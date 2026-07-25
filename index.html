@@ -7,51 +7,115 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Validador CGPA</title>
+<title>Validador Tarjetas de Beneficios</title>
 
 <link rel="stylesheet" href="style.css">
 
 </head>
 
+
 <body>
+
 
 <div class="contenedor">
 
-<h1>Centro General de Padres</h1>
 
-<p>Validación de tarjetas</p>
+    <img 
+        src="img/logo.png" 
+        alt="Logo CGPA"
+        class="logo"
+    >
 
-<button id="scanButton">
 
-📷 Escanear tarjeta
+    <h1>
+        Validador Tarjetas de Beneficios
+    </h1>
 
-  <div id="reader" style="width:100%;display:none;margin-top:20px;"></div>
 
-</button>
+    <h2>
+        Centro General de Padres y Apoderados
+        <br>
+        Saint Thomas College Osorno
+    </h2>
 
-<p>o</p>
 
-<input
-type="text"
-id="codigo"
-placeholder="Ingrese código">
+    <p class="descripcion">
 
-<button id="buscar">
+        Verifique la validez de una tarjeta de beneficios
 
-Validar
+    </p>
 
-</button>
 
-<div id="resultado"></div>
+    <button id="scanButton">
+
+        📷 Escanear tarjeta
+
+    </button>
+
+
+    <div 
+        id="reader" 
+        style="display:none; width:100%; margin-top:20px;"
+    ></div>
+
+
+    <p>
+
+        o ingrese el código manualmente
+
+    </p>
+
+
+    <input
+
+        type="text"
+
+        id="codigo"
+
+        placeholder="Ej: CGPA-2025-0001"
+
+    >
+
+
+    <button id="buscar">
+
+        Validar tarjeta
+
+    </button>
+
+
+
+    <div id="resultado"></div>
+
+
+
+    <div class="aviso">
+
+        ⚠️ Recuerde verificar la identidad de quien presenta la tarjeta.
+
+    </div>
+
+
+
+    <footer>
+
+
+        © 2026 - Centro General de Padres y Apoderados
+        <br>
+        Saint Thomas College Osorno
+
+    </footer>
+
 
 </div>
 
-<script src="script.js"></script>
+
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <script src="script.js"></script>
-  
+
+
 </body>
 
 </html>
