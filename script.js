@@ -163,3 +163,45 @@ document.getElementById("buscar").addEventListener("click", () => {
     `;
 
 });
+document.getElementById("scanButton").addEventListener("click", iniciarEscaner);
+
+function iniciarEscaner() {
+
+    const reader = document.getElementById("reader");
+
+    reader.style.display = "block";
+
+    const html5QrCode = new Html5Qrcode("reader");
+
+    html5QrCode.start(
+
+        { facingMode: "environment" },
+
+        {
+            fps: 10,
+            qrbox: 250
+        },
+
+        (textoLeido) => {
+
+            // Colocar automáticamente el código leído
+            document.getElementById("codigo").value = textoLeido;
+
+            // Detener la cámara
+            html5QrCode.stop();
+
+            reader.style.display = "none";
+
+            // Ejecutar la validación automáticamente
+            document.getElementById("buscar").click();
+
+        },
+
+        (error) => {
+
+            // Ignorar errores mientras busca el QR
+        }
+
+    );
+
+}
