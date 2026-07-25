@@ -2,62 +2,121 @@ let socios = [];
 
 // Cargar el CSV al iniciar
 async function cargarCSV() {
-    const respuesta = await fetch("datos/socios.csv");
-    const texto = await respuesta.text();
+    try {
 
-    const filas = texto.trim().split("\n");
+        const respuesta = await fetch("datos/socios.csv");
 
-    // Quitar encabezado
-    filas.shift();
+        const texto = await respuesta.text();
 
-    socios = filas.map(fila => {
-        const [codigo, nombre, estado] = fila.split(";");
+        const filas = texto.trim().split(/\r?\n/);
 
-        return {
-            codigo: codigo.trim(),
-            nombre: nombre.trim(),
-            estado: estado.trim()
-        };
-    });
+        // Eliminar encabezado
+        filas.shift();
 
-    console.log("Socios cargados:", socios);
+        socios = filas.map(fila => {
+
+            // Detectar automáticamente el separador
+            const separador = fila.includes(";") ? ";" : ",";
+
+            const columnas = fila.split(separador);
+
+            return {
+
+                codigo: columnas[0].trim(),
+
+                nombre: columnas[1].trim(),
+
+                estado: columnas[2].trim(),
+
+                convenios: columnas
+                    .slice(3)
+                    .map(c => c.trim())
+                    .filter(c => c !== "")
+
+            };
+
+        });
+
+        console.log("Socios cargados:", socios);
+
+    }
+    catch (error) {
+
+        console.error("Error cargando CSV:", error);
+
+    }
+
 }
 
 cargarCSV();
 
 document.getElementById("buscar").addEventListener("click", () => {
 
-    const codigoBuscado =
-        document.getElementById("codigo").value.trim();
-
-    const socio = socios.find(s => s.codigo === codigoBuscado);
+    const codigoBuscado = document
+        .getElementById("codigo")
+        .value
+        .trim();
 
     const resultado = document.getElementById("resultado");
 
-    if (!socio) {
+    if (codigoBuscado === "") {
 
-        resultado.innerHTML =
-            "<h3>❌ Código no encontrado</h3>";
+        resultado.innerHTML = "<h3>Ingrese un código.</h3>";
 
         return;
+
     }
 
-    if (socio.estado === "Bloqueado") {
+    const socio = socios.find(s => s.codigo === codigoBuscado);
+
+    if (!socio) {
 
         resultado.innerHTML = `
-            <h3>⚠ Tarjeta bloqueada</h3>
-            <p>${socio.nombre}</p>
+            <h3>❌ Código no encontrado</h3>
         `;
 
         return;
+
     }
 
+    if (socio.estado.toLowerCase() !== "activo") {
+
+        resultado.innerHTML = `
+            <h3>⚠ Tarjeta bloqueada</h3>
+
+            <p><b>Nombre:</b> ${socio.nombre}</p>
+
+            <p><b>Estado:</b> ${socio.estado}</p>
+        `;
+
+        return;
+
+    }
+
+    let listaConvenios = "";
+
+    socio.convenios.forEach(convenio => {
+
+        listaConvenios += `<li>${convenio}</li>`;
+
+    });
+
     resultado.innerHTML = `
-        <h3>✅ Tarjeta válida</h3>
+
+        <h2>✅ Tarjeta válida</h2>
 
         <p><b>Nombre:</b> ${socio.nombre}</p>
 
         <p><b>Estado:</b> ${socio.estado}</p>
+
+        <h3>Convenios disponibles</h3>
+
+        <ul>
+
+            ${listaConvenios}
+
+        </ul>
+
     `;
 
 });
