@@ -11,7 +11,7 @@ async function cargarCSV() {
     filas.shift();
 
     socios = filas.map(fila => {
-        const [codigo, nombre, estado] = fila.split(",");
+        const [codigo, nombre, estado] = fila.split(";");
 
         return {
             codigo: codigo.trim(),
