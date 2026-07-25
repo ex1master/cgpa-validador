@@ -1,7 +1,11 @@
 let socios = [];
+let encabezados = [];
 
-// Cargar el CSV al iniciar
+// ==========================
+// CARGAR CSV
+// ==========================
 async function cargarCSV() {
+
     try {
 
         const respuesta = await fetch("datos/socios.csv");
@@ -10,15 +14,35 @@ async function cargarCSV() {
 
         const filas = texto.trim().split(/\r?\n/);
 
-        // Eliminar encabezado
-        filas.shift();
+        // Detectar automáticamente el separador
+        const separador = filas[0].includes(";") ? ";" : ",";
+
+        // Leer encabezados
+        encabezados = filas.shift().split(separador).map(c => c.trim());
 
         socios = filas.map(fila => {
 
-            // Detectar automáticamente el separador
-            const separador = fila.includes(";") ? ";" : ",";
-
             const columnas = fila.split(separador);
+
+            let convenios = [];
+
+            for (let i = 3; i < columnas.length; i++) {
+
+                const valor = columnas[i].trim();
+
+                // Ignorar celdas vacías
+                if (valor === "")
+                    continue;
+
+                convenios.push({
+
+                    titulo: encabezados[i],
+
+                    valor: valor
+
+                });
+
+            }
 
             return {
 
@@ -28,18 +52,17 @@ async function cargarCSV() {
 
                 estado: columnas[2].trim(),
 
-                convenios: columnas
-                    .slice(3)
-                    .map(c => c.trim())
-                    .filter(c => c !== "")
+                convenios: convenios
 
             };
 
         });
 
-        console.log("Socios cargados:", socios);
+        console.log("CSV cargado correctamente");
+        console.log(socios);
 
     }
+
     catch (error) {
 
         console.error("Error cargando CSV:", error);
@@ -49,6 +72,10 @@ async function cargarCSV() {
 }
 
 cargarCSV();
+
+// ==========================
+// BOTÓN VALIDAR
+// ==========================
 
 document.getElementById("buscar").addEventListener("click", () => {
 
@@ -72,7 +99,7 @@ document.getElementById("buscar").addEventListener("click", () => {
     if (!socio) {
 
         resultado.innerHTML = `
-            <h3>❌ Código no encontrado</h3>
+            <h2>❌ Código no encontrado</h2>
         `;
 
         return;
@@ -82,7 +109,7 @@ document.getElementById("buscar").addEventListener("click", () => {
     if (socio.estado.toLowerCase() !== "activo") {
 
         resultado.innerHTML = `
-            <h3>⚠ Tarjeta bloqueada</h3>
+            <h2>⚠ Tarjeta bloqueada</h2>
 
             <p><b>Nombre:</b> ${socio.nombre}</p>
 
@@ -97,7 +124,23 @@ document.getElementById("buscar").addEventListener("click", () => {
 
     socio.convenios.forEach(convenio => {
 
-        listaConvenios += `<li>${convenio}</li>`;
+        // Si el encabezado es Convenio4, Convenio5, Convenio6...
+        if (/^convenio\d*$/i.test(convenio.titulo)) {
+
+            listaConvenios += `
+                <li>${convenio.valor}</li>
+            `;
+
+        }
+
+        // Si tiene un nombre propio
+        else {
+
+            listaConvenios += `
+                <li><b>${convenio.titulo}:</b> ${convenio.valor}</li>
+            `;
+
+        }
 
     });
 
