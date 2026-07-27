@@ -111,7 +111,7 @@ document.getElementById("buscar").addEventListener("click", () => {
         resultado.innerHTML = `
             <h2>⚠ Tarjeta bloqueada</h2>
 
-            <p><b>Nombre:</b> ${socio.nombre}</p>
+            <p><b>Numero de Tarjeta:</b> ${socio.nombre}</p>
 
             <p><b>Estado:</b> ${socio.estado}</p>
         `;
