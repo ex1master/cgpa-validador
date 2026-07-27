@@ -270,7 +270,7 @@ function validarTarjeta(){
         </h2>
 
         <p>
-        <b>Nombre:</b>
+        <b>Número de Tarjeta:</b>
         ${socio.nombre}
         </p>
 
@@ -401,7 +401,7 @@ function validarTarjeta(){
 
 
     <p>
-    <b>Nombre:</b>
+    <b>Número de Tarjeta:</b>
     ${socio.nombre}
     </p>
 
