@@ -1,5 +1,7 @@
 let socios = [];
 
+const rutaConvenios = "/convenios/";
+
 
 // ==========================
 // CARGAR CSV
@@ -13,15 +15,27 @@ async function cargarCSV() {
 
         const texto = await respuesta.text();
 
-        const filas = texto.trim().split(/\r?\n/);
+
+        const filas = texto
+            .trim()
+            .split(/\r?\n/);
 
 
-        const separador = filas[0].includes(";") ? ";" : ",";
 
+        // Detectar separador
+
+        const separador = filas[0].includes(";")
+            ? ";"
+            : ",";
+
+
+
+        // Leer encabezados
 
         const encabezados = filas.shift()
             .split(separador)
             .map(c => c.trim());
+
 
 
         socios = filas.map(fila => {
@@ -30,26 +44,59 @@ async function cargarCSV() {
             const columnas = fila.split(separador);
 
 
+
             let convenios = [];
 
 
-            // Desde columna 4 en adelante
-            // cada convenio ocupa 2 columnas:
-            // nombre convenio + archivo
 
-            for(let i = 3; i < columnas.length; i += 2) {
+            /*
+                Desde la columna 3:
 
+                Columna 3  = nombre convenio
+                Columna 4  = archivo
 
-                const titulo = encabezados[i];
+                Columna 5  = siguiente convenio
+                Columna 6  = archivo
 
-                const valor = columnas[i]?.trim();
-
-                const archivo = columnas[i + 1]?.trim();
-
+            */
 
 
-                if(!valor || valor === "")
+            for (
+                let i = 3;
+                i < columnas.length;
+                i += 2
+            ) {
+
+
+                const titulo =
+                    encabezados[i]
+                    ?.trim();
+
+
+
+                const valor =
+                    columnas[i]
+                    ?.trim();
+
+
+
+                const archivo =
+                    columnas[i + 1]
+                    ?.trim();
+
+
+
+
+                // Si no hay beneficio, saltar
+
+                if (
+                    !valor ||
+                    valor === ""
+                ) {
+
                     continue;
+
+                }
 
 
 
@@ -70,13 +117,28 @@ async function cargarCSV() {
 
             return {
 
-                codigo: columnas[0].trim(),
 
-                nombre: columnas[1].trim(),
+                codigo:
+                    columnas[0]
+                    ?.trim(),
 
-                estado: columnas[2].trim(),
 
-                convenios: convenios
+
+                nombre:
+                    columnas[1]
+                    ?.trim(),
+
+
+
+                estado:
+                    columnas[2]
+                    ?.trim(),
+
+
+
+                convenios:
+                    convenios
+
 
             };
 
@@ -85,24 +147,34 @@ async function cargarCSV() {
 
 
 
-        console.log("Datos cargados:", socios);
+        console.log(
+            "Socios cargados:",
+            socios
+        );
 
 
     }
 
-    catch(error){
+
+    catch(error) {
+
 
         console.error(
-            "Error leyendo CSV:",
+            "Error cargando CSV:",
             error
         );
 
+
     }
+
 
 }
 
 
+
 cargarCSV();
+
+
 
 
 
@@ -111,35 +183,69 @@ cargarCSV();
 // ==========================
 
 
-document.getElementById("buscar")
-.addEventListener("click",()=>{
+document
+.getElementById("buscar")
+.addEventListener(
+"click",
+validarTarjeta
+);
+
+
+
+function validarTarjeta(){
 
 
     const codigo =
-    document.getElementById("codigo")
-    .value
-    .trim();
+        document
+        .getElementById("codigo")
+        .value
+        .trim();
 
 
 
     const resultado =
-    document.getElementById("resultado");
+        document
+        .getElementById("resultado");
+
+
+
+    if(!codigo){
+
+
+        resultado.innerHTML =
+        `
+        <h3>
+        Ingrese un código
+        </h3>
+        `;
+
+
+        return;
+
+    }
+
 
 
 
     const socio =
-    socios.find(
-        s => s.codigo === codigo
-    );
+        socios.find(
+            s =>
+            s.codigo === codigo
+        );
+
 
 
 
     if(!socio){
 
+
         resultado.innerHTML =
         `
-        <h2>❌ Código no encontrado</h2>
+        <h2>
+        ❌ Código no encontrado
+        </h2>
         `;
+
 
         return;
 
@@ -147,20 +253,35 @@ document.getElementById("buscar")
 
 
 
-    if(socio.estado.toLowerCase() !== "activo"){
+
+    if(
+        socio.estado
+        .toLowerCase()
+        !==
+        "activo"
+    ){
 
 
         resultado.innerHTML =
         `
 
-        <h2>⚠ Tarjeta bloqueada</h2>
+        <h2>
+        ⚠ Tarjeta no activa
+        </h2>
 
         <p>
+        <b>Nombre:</b>
         ${socio.nombre}
+        </p>
+
+        <p>
+        <b>Estado:</b>
+        ${socio.estado}
         </p>
 
         `;
 
+
         return;
 
     }
@@ -168,61 +289,95 @@ document.getElementById("buscar")
 
 
 
-    let lista = "";
+
+    let listaConvenios = "";
 
 
 
-    socio.convenios.forEach(c=>{
+
+    socio.convenios
+    .forEach(
+    convenio => {
 
 
-        let detalle = "";
+
+        let enlace = "";
 
 
 
-        if(c.archivo){
+        if(
+            convenio.archivo &&
+            convenio.archivo !== ""
+        ){
 
-            detalle =
+
+            enlace =
             `
+
             <br>
-            <a href="convenios/${c.archivo}"
-            target="_blank">
+
+            <a href="${rutaConvenios}${convenio.archivo}"
+               target="_blank">
 
             📄 Ver detalles del convenio
 
             </a>
-            `;
 
-        }
-
-
-
-        if(/^convenio\d*$/i.test(c.titulo)){
-
-
-            lista +=
-            `
-            <li>
-            ${c.valor}
-            ${detalle}
-            </li>
             `;
 
 
         }
 
-        else{
 
 
-            lista +=
+
+
+        // Si se llama Convenio4, Convenio5, etc.
+
+        if(
+            /^convenio\d+$/i
+            .test(convenio.titulo)
+        ){
+
+
+            listaConvenios +=
             `
+
             <li>
 
-            <b>${c.titulo}:</b>
-            ${c.valor}
+            ${convenio.valor}
 
-            ${detalle}
+            ${enlace}
 
             </li>
+
+
+            `;
+
+
+        }
+
+
+        else {
+
+
+
+            listaConvenios +=
+            `
+
+            <li>
+
+            <b>
+            ${convenio.titulo}:
+            </b>
+
+            ${convenio.valor}
+
+            ${enlace}
+
+            </li>
+
+
             `;
 
 
@@ -234,28 +389,38 @@ document.getElementById("buscar")
 
 
 
+
+
     resultado.innerHTML =
 
     `
 
-    <h2>✅ Tarjeta válida</h2>
+    <h2>
+    ✅ Tarjeta válida
+    </h2>
+
 
     <p>
-    <b>Nombre:</b> ${socio.nombre}
+    <b>Nombre:</b>
+    ${socio.nombre}
     </p>
 
 
-    <h3>Convenios disponibles</h3>
+
+    <h3>
+    Convenios disponibles
+    </h3>
 
 
     <ul>
 
-    ${lista}
+    ${listaConvenios}
 
     </ul>
+
 
     `;
 
 
 
-});
+}
