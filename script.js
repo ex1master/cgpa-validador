@@ -148,7 +148,7 @@ document.getElementById("buscar").addEventListener("click", () => {
 
         <h2>✅ Tarjeta válida</h2>
 
-        <p><b>Nombre:</b> ${socio.nombre}</p>
+        <p><b>Numero de Tarjeta:</b> ${socio.nombre}</p>
 
         <p><b>Estado:</b> ${socio.estado}</p>
 
