@@ -1,9 +1,10 @@
 let socios = [];
-let encabezados = [];
+
 
 // ==========================
 // CARGAR CSV
 // ==========================
+
 async function cargarCSV() {
 
     try {
@@ -14,35 +15,58 @@ async function cargarCSV() {
 
         const filas = texto.trim().split(/\r?\n/);
 
-        // Detectar automáticamente el separador
+
         const separador = filas[0].includes(";") ? ";" : ",";
 
-        // Leer encabezados
-        encabezados = filas.shift().split(separador).map(c => c.trim());
+
+        const encabezados = filas.shift()
+            .split(separador)
+            .map(c => c.trim());
+
 
         socios = filas.map(fila => {
 
+
             const columnas = fila.split(separador);
+
 
             let convenios = [];
 
-            for (let i = 3; i < columnas.length; i++) {
 
-                const valor = columnas[i].trim();
+            // Desde columna 4 en adelante
+            // cada convenio ocupa 2 columnas:
+            // nombre convenio + archivo
 
-                // Ignorar celdas vacías
-                if (valor === "")
+            for(let i = 3; i < columnas.length; i += 2) {
+
+
+                const titulo = encabezados[i];
+
+                const valor = columnas[i]?.trim();
+
+                const archivo = columnas[i + 1]?.trim();
+
+
+
+                if(!valor || valor === "")
                     continue;
+
+
 
                 convenios.push({
 
-                    titulo: encabezados[i],
+                    titulo: titulo,
 
-                    valor: valor
+                    valor: valor,
+
+                    archivo: archivo
 
                 });
 
+
             }
+
+
 
             return {
 
@@ -56,152 +80,182 @@ async function cargarCSV() {
 
             };
 
+
         });
 
-        console.log("CSV cargado correctamente");
-        console.log(socios);
+
+
+        console.log("Datos cargados:", socios);
+
 
     }
 
-    catch (error) {
+    catch(error){
 
-        console.error("Error cargando CSV:", error);
+        console.error(
+            "Error leyendo CSV:",
+            error
+        );
 
     }
 
 }
+
 
 cargarCSV();
 
+
+
 // ==========================
-// BOTÓN VALIDAR
+// VALIDAR TARJETA
 // ==========================
 
-document.getElementById("buscar").addEventListener("click", () => {
 
-    const codigoBuscado = document
-        .getElementById("codigo")
-        .value
-        .trim();
+document.getElementById("buscar")
+.addEventListener("click",()=>{
 
-    const resultado = document.getElementById("resultado");
 
-    if (codigoBuscado === "") {
+    const codigo =
+    document.getElementById("codigo")
+    .value
+    .trim();
 
-        resultado.innerHTML = "<h3>Ingrese un código.</h3>";
 
-        return;
 
-    }
+    const resultado =
+    document.getElementById("resultado");
 
-    const socio = socios.find(s => s.codigo === codigoBuscado);
 
-    if (!socio) {
 
-        resultado.innerHTML = `
-            <h2>❌ Código no encontrado</h2>
+    const socio =
+    socios.find(
+        s => s.codigo === codigo
+    );
+
+
+
+    if(!socio){
+
+        resultado.innerHTML =
+        `
+        <h2>❌ Código no encontrado</h2>
         `;
 
         return;
 
     }
 
-    if (socio.estado.toLowerCase() !== "activo") {
 
-        resultado.innerHTML = `
-            <h2>⚠ Tarjeta bloqueada</h2>
 
-            <p><b>Numero de Tarjeta:</b> ${socio.nombre}</p>
+    if(socio.estado.toLowerCase() !== "activo"){
 
-            <p><b>Estado:</b> ${socio.estado}</p>
+
+        resultado.innerHTML =
+        `
+
+        <h2>⚠ Tarjeta bloqueada</h2>
+
+        <p>
+        ${socio.nombre}
+        </p>
+
         `;
 
         return;
 
     }
 
-    let listaConvenios = "";
 
-    socio.convenios.forEach(convenio => {
 
-        // Si el encabezado es Convenio4, Convenio5, Convenio6...
-        if (/^convenio\d*$/i.test(convenio.titulo)) {
 
-            listaConvenios += `
-                <li>${convenio.valor}</li>
+    let lista = "";
+
+
+
+    socio.convenios.forEach(c=>{
+
+
+        let detalle = "";
+
+
+
+        if(c.archivo){
+
+            detalle =
+            `
+            <br>
+            <a href="convenios/${c.archivo}"
+            target="_blank">
+
+            📄 Ver detalles del convenio
+
+            </a>
             `;
 
         }
 
-        // Si tiene un nombre propio
-        else {
 
-            listaConvenios += `
-                <li><b>${convenio.titulo}:</b> ${convenio.valor}</li>
+
+        if(/^convenio\d*$/i.test(c.titulo)){
+
+
+            lista +=
+            `
+            <li>
+            ${c.valor}
+            ${detalle}
+            </li>
             `;
 
+
         }
+
+        else{
+
+
+            lista +=
+            `
+            <li>
+
+            <b>${c.titulo}:</b>
+            ${c.valor}
+
+            ${detalle}
+
+            </li>
+            `;
+
+
+        }
+
+
 
     });
 
-    resultado.innerHTML = `
 
-        <h2>✅ Tarjeta válida</h2>
 
-        <p><b>Numero de Tarjeta:</b> ${socio.nombre}</p>
+    resultado.innerHTML =
 
-        <p><b>Estado:</b> ${socio.estado}</p>
+    `
 
-        <h3>Convenios disponibles</h3>
+    <h2>✅ Tarjeta válida</h2>
 
-        <ul>
+    <p>
+    <b>Nombre:</b> ${socio.nombre}
+    </p>
 
-            ${listaConvenios}
 
-        </ul>
+    <h3>Convenios disponibles</h3>
+
+
+    <ul>
+
+    ${lista}
+
+    </ul>
 
     `;
 
+
+
 });
-document.getElementById("scanButton").addEventListener("click", iniciarEscaner);
-
-function iniciarEscaner() {
-
-    const reader = document.getElementById("reader");
-
-    reader.style.display = "block";
-
-    const html5QrCode = new Html5Qrcode("reader");
-
-    html5QrCode.start(
-
-        { facingMode: "environment" },
-
-        {
-            fps: 10,
-            qrbox: 250
-        },
-
-        (textoLeido) => {
-
-            // Colocar automáticamente el código leído
-            document.getElementById("codigo").value = textoLeido;
-
-            // Detener la cámara
-            html5QrCode.stop();
-
-            reader.style.display = "none";
-
-            // Ejecutar la validación automáticamente
-            document.getElementById("buscar").click();
-
-        },
-
-        (error) => {
-
-            // Ignorar errores mientras busca el QR
-        }
-
-    );
-
-}
