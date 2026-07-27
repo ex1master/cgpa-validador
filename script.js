@@ -266,7 +266,7 @@ function validarTarjeta(){
         `
 
         <h2>
-        ⚠ Tarjeta no activa
+        ⚠ Tarjeta Bloqueada
         </h2>
 
         <p>
