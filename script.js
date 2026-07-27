@@ -424,3 +424,106 @@ function validarTarjeta(){
 
 
 }
+
+// ==========================
+// LECTOR QR
+// ==========================
+
+document
+.getElementById("scanButton")
+.addEventListener(
+"click",
+iniciarEscaner
+);
+
+
+function iniciarEscaner(){
+
+
+    const reader =
+    document.getElementById("reader");
+
+
+    reader.style.display = "block";
+
+
+    const html5QrCode =
+    new Html5Qrcode("reader");
+
+
+
+    html5QrCode.start(
+
+        {
+            facingMode: "environment"
+        },
+
+
+        {
+            fps: 10,
+            qrbox: 250
+        },
+
+
+        (codigoLeido)=>{
+
+
+            console.log(
+                "QR leído:",
+                codigoLeido
+            );
+
+
+            // Coloca el código en el input
+
+            document
+            .getElementById("codigo")
+            .value = codigoLeido;
+
+
+
+            // Detiene cámara
+
+            html5QrCode.stop()
+            .then(()=>{
+
+
+                reader.style.display =
+                "none";
+
+
+            });
+
+
+
+            // Valida automáticamente
+
+            validarTarjeta();
+
+
+
+        },
+
+
+        (error)=>{
+
+            // Ignorar errores mientras busca
+
+        }
+
+
+    )
+
+    .catch(error=>{
+
+
+        console.error(
+            "No se pudo iniciar cámara:",
+            error
+        );
+
+
+    });
+
+
+}
