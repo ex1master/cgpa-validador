@@ -364,21 +364,16 @@ function validarTarjeta(){
 
             listaConvenios +=
             `
+<div class="convenio">
 
-            <li>
+    <h4>${convenio.titulo}</h4>
 
-            <b>
-            ${convenio.titulo}:
-            </b>
+    <p>${convenio.valor}</p>
 
-            ${convenio.valor}
+    ${enlace}
 
-            ${enlace}
-
-            </li>
-
-
-            `;
+</div>
+`;
 
 
         }
