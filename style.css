@@ -60,3 +60,29 @@ font-size:16px;
     margin-bottom: 15px;
 
 }
+
+.convenio{
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    padding:15px;
+
+    margin-bottom:15px;
+
+    background:#fafafa;
+
+}
+
+.convenio h4{
+
+    margin:0 0 10px;
+
+}
+
+.convenio p{
+
+    margin:0 0 10px;
+
+}
